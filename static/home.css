@@ -1,4 +1,32 @@
 body {
     background-color: beige;
 }
+table {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    border-collapse: collapse;
+}
 
+th, td {
+    text-align: center;
+    border: 1px solid black;
+    padding: 8px;
+    font-size:20px
+}
+
+th {
+    background-color: #f2f2f2;
+}
+td {
+    background-color: lightgray;
+}
+.growth-true {
+    background-color: #d4edda; /* Light green background */
+    color: #155724; /* Dark green text */
+}
+
+.growth-false {
+    background-color: #f8d7da; /* Light red background */
+    color: #721c24; /* Dark red text */
+}

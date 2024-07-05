@@ -1,15 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <link rel="stylesheet" type="text/css" href="../static/home.css">
-        <script src="../static/script.js"></script>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
-        <h1>Dynamic Data Update</h1>
-            <div id="data-container">
-                    <!-- Data will be dynamically inserted here -->
-            </div>
-    </body>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='home.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Dynamic Data Update</h1>
+<div id="data-container">
+    <table id="data-table" class="table-centered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Last</th>
+                <th>High</th>
+                <th>Low</th>
+                <th>Volume</th>
+                <th>Change</th>
+                <th>Change Percent</th>
+                <th>Growth</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+</body>
 </html>

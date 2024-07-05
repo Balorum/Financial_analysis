@@ -67,7 +67,7 @@ def update_companies():
                           last=values['last'],
                           high=values['high'],
                           low=values['low'],
-                          volume=values['vol'],
+                          volume=round(values['vol'], 3),
                           change=values['change'],
                           change_pct=values['change_pct'],
                           growth=values['growth'])

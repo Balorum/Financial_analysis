@@ -1,18 +1,23 @@
 async function fetchData() {
-    try {
-        const response = await fetch('/data');
-        const data = await response.json();
-        console.log(data); // Log the data to check if it's fetched correctly
-        const dataContainer = document.getElementById('data-container');
-        dataContainer.innerHTML = '';
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.textContent = item.value;
-            dataContainer.appendChild(div);
-        });
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
+    const response = await fetch('/data');
+    const data = await response.json();
+    const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = ''; // Clear previous data
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><a href="/stock/${item.id}" target=”_blank”>${item.title}</a></td>
+            <td style="text-align: left">${item.last}</td>
+            <td>${item.high}</td>
+            <td>${item.low}</td>
+            <td>${item.volume}</td>
+            <td>${item.change}</td>
+            <td>${item.change_pct}</td>
+            <td class="${item.growth ? 'growth-true' : 'growth-false'}">${item.growth}</td>
+        `;
+        tableBody.appendChild(row);
+    });
 }
 
 setInterval(fetchData, 5000); // Fetch data every 5 seconds
