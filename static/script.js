@@ -20,5 +20,5 @@ async function fetchData() {
     });
 }
 
-setInterval(fetchData, 5000); // Fetch data every 5 seconds
-window.onload = fetchData; // Fetch data on page load
+setInterval(fetchData, 5000);
+window.onload = fetchData;

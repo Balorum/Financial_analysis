@@ -6,8 +6,6 @@ from sqlalchemy import text
 
 web_sites = {
     "investing.com": "https://www.investing.com/",
-    "AIER": "https://www.aier.org/articles/",
-    "Financial_Times": "https://www.ft.com/markets"
 }
 
 currency_link = "https://www.investing.com/equities/trending-stocks"

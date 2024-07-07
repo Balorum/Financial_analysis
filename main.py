@@ -3,7 +3,7 @@ from database.db import get_db
 from database.models import Stock
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
-from parsing import parser
+from parsing import currency_parser
 
 app = Flask(__name__)
 
@@ -52,7 +52,7 @@ def shutdown_session(exception=None):
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=parser.update_companies, trigger="interval", seconds=7)
+scheduler.add_job(func=currency_parser.update_companies, trigger="interval", seconds=7)
 scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
