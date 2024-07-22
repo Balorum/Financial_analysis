@@ -1,6 +1,10 @@
 import os
 import bs4 as bs
-import requests
+from selenium.webdriver import Edge, EdgeOptions
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
@@ -9,10 +13,23 @@ base_link = "https://www.investing.com"
 stocks_link = "https://www.investing.com/equities/trending-stocks"
 
 
+def initialize_driver():
+    options = EdgeOptions()
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-popup-blocking")
+
+    driver = Edge(options=options)
+
+    return driver
+
+
 def get_stocks_page():
+
     stocks_dict = {}
-    page = requests.get(stocks_link)
-    soup = bs.BeautifulSoup(page.content, 'html.parser')
+    driver = initialize_driver()
+    driver.get(stocks_link)
+    time.sleep(5)
+    soup = bs.BeautifulSoup(driver.page_source, 'html.parser')
 
     rows = soup.find('tbody', attrs={'class': "datatable-v2_body__8TXQk"}).find_all('tr')
 
@@ -21,22 +38,34 @@ def get_stocks_page():
         news_link = base_link + element.get('href')
         stocks_dict[element.text] = news_link
 
+    driver.quit()
+
     return stocks_dict
 
 
 def get_articles_link():
     stocks_dict = get_stocks_page()
     for key, value in stocks_dict.items():
-        page = requests.get(value)
-        soup = bs.BeautifulSoup(page.content, 'html.parser')
-        rows = (soup.find('ul', attrs={'data-test': "new-and-analysis-list"})
-                .find_all('li', attrs={'class': "border-[#E6E9EB] first:border-t border-b"}))
+        driver = initialize_driver()
+        driver.get(value)
+        time.sleep(5)
+        soup = bs.BeautifulSoup(driver.page_source, 'html.parser')
+        try:
+            rows = (soup.find('ul', attrs={'data-test': "new-and-analysis-list"})
+                    .find_all('li', attrs={'class': "border-[#E6E9EB] first:border-t border-b"}))
+        except AttributeError as e:
+            print(f"Error while parsing articles for {key}: {e}")
+        finally:
+            driver.quit()
         for number, row in enumerate(rows):
-            # if row.find('svg') is not None:
                 element = row.find('a', attrs={'data-test': "article-title-link"})
                 if "/pro/" not in element.get("href"):
                     news_link = base_link + element.get("href")
-                    get_articles_pages(key, news_link, number)
+                    try:
+                        get_articles_pages(key, news_link, number)
+                    except Exception as e:
+                        print(f"Error while processing article {number} for {key}: {e}")
+                        continue
 
 
 def normalize_company(company):
@@ -56,14 +85,23 @@ def create_directories():
         for company in companies:
             dir_name = normalize_company(company)
             os.mkdir(f"data/stocks/{dir_name}")
+    get_articles_link()
 
 
 def get_articles_pages(company, news_link, number):
     company = normalize_company(company)
-    page = requests.get(news_link)
-    soup = bs.BeautifulSoup(page.content, 'html.parser')
-    rows = (soup.find('div', attrs={'class': "article_WYSIWYG__O0uhw article_articlePage__UMz3q text-[18px] leading-8"})
+    driver = initialize_driver()
+    driver.get(news_link)
+    time.sleep(5)
+    soup = bs.BeautifulSoup(driver.page_source, 'html.parser')
+    try:
+        rows = (
+            soup.find('div', attrs={'class': "article_WYSIWYG__O0uhw article_articlePage__UMz3q text-[18px] leading-8"})
             .find_all('p'))
+    except AttributeError as e:
+        print(f"Error while parsing article page for {company}: {e}")
+    finally:
+        driver.quit()
     for root, dirs, files in os.walk(os.getcwd() + "/data/stocks"):
         for dir_name in dirs:
             folder_path = os.path.join(root, dir_name)
@@ -71,11 +109,12 @@ def get_articles_pages(company, news_link, number):
                 article = ""
                 for row in rows:
                     article += row.text
-                print(folder_path + f"/{company}_article_{number}.txt")
-                with open(folder_path + f"/{company}_article_{number}.txt", "w", encoding='utf-8') as f:
-                    f.write(article)
+                try:
+                    file_path = folder_path + f"/{company}_article_{number}.txt"
+                    with open(file_path, "w", encoding='utf-8') as f:
+                        f.write(article)
+                except Exception as e:
+                    print(f"Error while writing article {number} for {company}: {e}")
 
 
-if __name__ == "__main__":
-    create_directories()
-    get_articles_link()
+create_directories()

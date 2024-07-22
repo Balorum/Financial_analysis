@@ -4,6 +4,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stock.css') }}">
     <meta charset="UTF-8">
     <title>{{ stock.title }}</title>
+    <script src="{{ url_for('static', filename='stock_script.js') }}"></script>
+    <script>
+        // Pass the initial value from the server to a JavaScript variable
+        const initialValue = {{ value }};
+    </script>
 </head>
 <body>
     <div class = "currency-block">

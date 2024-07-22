@@ -19,3 +19,16 @@ class Stock(Base):
     change_pct = Column(Float, nullable=False)
     growth = Column(Boolean, nullable=False)
     date = Column(DateTime, nullable=False, default=func.now())
+    # Define a relationship to the StockSentiment table
+    sentiments = relationship("StockSentiment", back_populates="stock")
+
+
+class StockSentiment(Base):
+    __tablename__ = "stock_sentiments"
+    id = Column(Integer, primary_key=True)
+    stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
+    positives = Column(Integer, nullable=False, default=0)
+    negatives = Column(Integer, nullable=False, default=0)
+
+    # Define a relationship to the Stock table
+    stock = relationship("Stock", back_populates="sentiments")
