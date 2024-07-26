@@ -1,17 +1,14 @@
-function updateBackgroundColor(value) {
-            const maxAbsValue = 7;
+function updateBackgroundColor(value, max_value) {
             let red, green;
 
             if (value < 0) {
-                // Negative values: from red (full) to white
                 red = 255;
-                green = 255 + Math.round((255 / maxAbsValue) * value); // value is negative, so this subtracts from 255
+                green = 255 + Math.round((255 / max_value) * value);
             } else {
-                // Positive values: from white to green (full)
                 green = 255;
-                red = 255 - Math.round((255 / maxAbsValue) * value); // value is positive, so this subtracts from 255
+                red = 255 - Math.round((255 / max_value) * value);
             }
-            const alpha = 0.3; // Adjust this value as needed (0.5 for 50% transparency)
+            const alpha = 0.3;
 
             document.body.style.backgroundColor = `rgba(${red}, ${green}, 0, ${alpha})`;
         }
@@ -19,5 +16,5 @@ function updateBackgroundColor(value) {
         // Set initial background color from server value
         document.addEventListener("DOMContentLoaded", function() {
             // const initialValue = {{ value }};
-            updateBackgroundColor(initialValue);
+            updateBackgroundColor(initialValue, maxValue);
         });

@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stock.css') }}">
     <meta charset="UTF-8">
     <title>{{ stock.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stock.css') }}">
     <script src="{{ url_for('static', filename='stock_script.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script>
         // Pass the initial value from the server to a JavaScript variable
         const initialValue = {{ value }};
+        const maxValue = {{ max_value }};
     </script>
 </head>
 <body>
-    <div class = "currency-block">
-            <h1>{{ stock.title }}</h1>
-            <p class="currency-text"><strong>Value:</strong> {{ stock.last }}</p>
-            <p class="currency-text"><strong>High:</strong> {{ stock.high }}</p>
-            <p class="currency-text"><strong>Low:</strong> {{ stock.low }}</p>
-            <p class="currency-text"><strong>Change:</strong> {{ stock.change }}</p>
-            <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct }}</p>
-            <p class="currency-text"><strong>Volume:</strong> {{ stock.volume }}</p>
-            <p class="currency-text"><strong>Growth:</strong> {{ 'Yes' if stock.growth else 'No' }}</p>
+    <div class="currency-block">
+        <h1>{{ stock.title }}</h1>
+        <p class="currency-text"><strong>Value:</strong> {{ stock.last }}</p>
+        <p class="currency-text"><strong>High:</strong> {{ stock.high }}</p>
+        <p class="currency-text"><strong>Low:</strong> {{ stock.low }}</p>
+        <p class="currency-text"><strong>Change:</strong> {{ stock.change }}</p>
+        <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct }}</p>
+        <p class="currency-text"><strong>Volume:</strong> {{ stock.volume }}</p>
+        <p class="currency-text"><strong>Growth:</strong> {{ 'Yes' if stock.growth else 'No' }}</p>
     </div>
     <a href="/" class="back-to-home">Back to Home</a>
 </body>

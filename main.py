@@ -3,7 +3,7 @@ from database.db import get_db
 from database.models import Stock, StockSentiment
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
-# from parsing import currency_parser, article_parser
+# from parsing import currency_parser , article_parser
 
 app = Flask(__name__)
 
@@ -21,8 +21,9 @@ def stock_detail(stock_id):
         g.db = db
     stock_sentiment = db.query(StockSentiment).filter(StockSentiment.stock_id == stock_id).first()
     value = stock_sentiment.positives - stock_sentiment.negatives
+    max_value = stock_sentiment.positives + stock_sentiment.negatives
     stock = db.query(Stock).filter(Stock.id == stock_id).first()
-    return render_template("stock.html", stock=stock, value=value)
+    return render_template("stock.html", stock=stock, value=value, max_value=max_value)
 
 
 @app.route("/data", methods=["GET", "POST"])
@@ -56,7 +57,7 @@ def shutdown_session(exception=None):
 # scheduler.add_job(func=currency_parser.update_companies, trigger="interval", minutes=30)
 # scheduler.add_job(func=article_parser.create_directories, trigger="interval", minutes=30)
 # scheduler.start()
-#
+
 # atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == "__main__":
