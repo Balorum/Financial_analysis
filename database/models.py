@@ -10,7 +10,7 @@ Base = declarative_base()
 class Stock(Base):
     __tablename__ = "stocks"
     id = Column(Integer, primary_key=True)
-    title = Column(String(50), nullable=False)
+    title = Column(String(100), nullable=False)
     last = Column(Float, nullable=False)
     high = Column(Float, nullable=False)
     low = Column(Float, nullable=False)
@@ -19,8 +19,21 @@ class Stock(Base):
     change_pct = Column(Float, nullable=False)
     growth = Column(Boolean, nullable=False)
     date = Column(DateTime, nullable=False, default=func.now())
-    # Define a relationship to the StockSentiment table
+
     sentiments = relationship("StockSentiment", back_populates="stock")
+    titles = relationship("StockTitle", back_populates="stock")
+
+
+class StockHistory(Base):
+    __tablename__ = "stocks_history"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(100), nullable=False)
+    open = Column(Float, nullable=False)
+    high = Column(Float, nullable=False)
+    low = Column(Float, nullable=False)
+    close = Column(Float, nullable=False)
+    volume = Column(Float, nullable=False)
+    date = Column(DateTime, nullable=False)
 
 
 class StockSentiment(Base):
@@ -30,5 +43,14 @@ class StockSentiment(Base):
     positives = Column(Integer, nullable=False, default=0)
     negatives = Column(Integer, nullable=False, default=0)
 
-    # Define a relationship to the Stock table
     stock = relationship("Stock", back_populates="sentiments")
+
+
+class StockTitle(Base):
+    __tablename__ = "stock_titles"
+    id = Column(Integer, primary_key=True)
+    stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
+    title = Column(String(250), nullable=False)
+    link = Column(String(300), nullable=False)
+
+    stock = relationship("Stock", back_populates="titles")

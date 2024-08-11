@@ -6,23 +6,89 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='stock.css') }}">
     <script src="{{ url_for('static', filename='stock_script.js') }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Pass the initial value from the server to a JavaScript variable
         const initialValue = {{ value }};
         const maxValue = {{ max_value }};
     </script>
 </head>
 <body>
-    <div class="currency-block">
-        <h1>{{ stock.title }}</h1>
-        <p class="currency-text"><strong>Value:</strong> {{ stock.last }}</p>
-        <p class="currency-text"><strong>High:</strong> {{ stock.high }}</p>
-        <p class="currency-text"><strong>Low:</strong> {{ stock.low }}</p>
-        <p class="currency-text"><strong>Change:</strong> {{ stock.change }}</p>
-        <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct }}</p>
-        <p class="currency-text"><strong>Volume:</strong> {{ stock.volume }}</p>
-        <p class="currency-text"><strong>Growth:</strong> {{ 'Yes' if stock.growth else 'No' }}</p>
+    <div class="main-container">
+        <div class="container">
+            <div class="currency-block">
+                <h1>{{ stock.title }}</h1>
+                <p class="currency-text"><strong>Value:</strong> {{ stock.last }}</p>
+                <p class="currency-text"><strong>High:</strong> {{ stock.high }}</p>
+                <p class="currency-text"><strong>Low:</strong> {{ stock.low }}</p>
+                <p class="currency-text"><strong>Change:</strong> {{ stock.change }}</p>
+                <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct }}</p>
+                <p class="currency-text"><strong>Volume:</strong> {{ stock.volume }}</p>
+                <p class="currency-text"><strong>Growth:</strong> {{ 'Yes' if stock.growth else 'No' }}</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+
+        <div class="news-section">
+            <div class="links-section">
+                <h2>Conclusions were made based on these articles:</h2>
+                {% for title, link in titles_and_links %}
+                    <div class="link-item">
+                        <a href="{{ link }}" target="_blank">{{ title }}</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
+    <script>
+        const dates = {{ dates | tojson }};
+
+        const data = {
+            labels: dates,
+            datasets: [{
+                label: 'Price',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: {{ closes | tojson }},
+                fill: true
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Stock History',
+                        font: {
+                            size: 24 // Adjust the font size as needed
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                }
+            }
+        };
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        ctx.canvas.style.backgroundColor = 'white';
+
+        const myChart = new Chart(ctx, config);
+    </script>
     <a href="/" class="back-to-home">Back to Home</a>
 </body>
 </html>
