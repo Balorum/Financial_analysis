@@ -4,7 +4,7 @@ from vertexai.generative_models import GenerativeModel
 # TODO(developer): Update and un-comment below line
 project_id = "phonic-obelisk-431915-c8"
 
-vertexai.init(project=project_id, location="us-central1")
+vertexai.init(project=project_id, location="europe-west2")
 
 model = GenerativeModel("gemini-1.5-flash-001")
 

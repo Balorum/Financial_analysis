@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, func
+from sqlalchemy import Column, Integer, String, Boolean, Float, Text, func
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
@@ -46,11 +46,12 @@ class StockSentiment(Base):
     stock = relationship("Stock", back_populates="sentiments")
 
 
-class StockTitle(Base):
+class StockNews(Base):
     __tablename__ = "stock_titles"
     id = Column(Integer, primary_key=True)
     stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
     title = Column(String(250), nullable=False)
     link = Column(String(300), nullable=False)
+    summary = Column(Text(), nullable=True)
 
     stock = relationship("Stock", back_populates="titles")
