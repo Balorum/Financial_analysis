@@ -8,8 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const initialValue = {{ value }};
-        const maxValue = {{ max_value }};
+        const pos = {{ positive }};
+        const neg = {{ negative }};
     </script>
 </head>
 <body>
@@ -20,7 +20,12 @@
                 <p class="currency-text"><strong>Value:</strong> {{ stock.last }}</p>
                 <p class="currency-text"><strong>High:</strong> {{ stock.high }}</p>
                 <p class="currency-text"><strong>Low:</strong> {{ stock.low }}</p>
-                <p class="currency-text"><strong>Change:</strong> {{ stock.change }}</p>
+                <p class="currency-text"><strong>Change:</strong> {{ stock.change*10 }}%{% if stock.growth %}
+                        <img src="{{ url_for('static', filename='images/growth.png') }}" alt="Up Arrow" class="growth-arrow">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/fall.png') }}" alt="Down Arrow" class="growth-arrow">
+                    {% endif %}
+                </p>
                 <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct }}</p>
                 <p class="currency-text"><strong>Volume:</strong> {{ stock.volume }}</p>
                 <p class="currency-text"><strong>Growth:</strong> {{ 'Yes' if stock.growth else 'No' }}</p>
@@ -33,11 +38,20 @@
         <div class="news-section">
             <div class="links-section">
                 <h2>Conclusions were made based on these articles:</h2>
-                {% for title, link in titles_and_links %}
+                {% for title, link, summary in titles_and_summaries %}
                     <div class="link-item">
                         <a href="{{ link }}" target="_blank">{{ title }}</a>
+                        <p>{{ summary }}</p>
                     </div>
                 {% endfor %}
+            </div>
+        </div>
+
+    <div class="prediction-container">
+            <h3>Prediction for the stock</h3>
+            <div class="ratio-strip">
+                <div class="green-strip"></div>
+                <div class="red-strip"></div>
             </div>
         </div>
     </div>

@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, g
 from database.db import get_db
-from database.models import Stock, StockSentiment, StockHistory, StockTitle
+from database.models import Stock, SentimentCompound, StockHistory, StockNews
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 # from parsing import currency_parser #, article_parser
@@ -19,9 +19,9 @@ def stock_detail(stock_id):
     if db is None:
         db = next(get_db())
         g.db = db
-    stock_sentiment = db.query(StockSentiment).filter(StockSentiment.stock_id == stock_id).first()
-    value = stock_sentiment.positives - stock_sentiment.negatives
-    max_value = stock_sentiment.positives + stock_sentiment.negatives
+    stock_compound = db.query(SentimentCompound).filter(SentimentCompound.stock_id == stock_id).first()
+    positive = stock_compound.rise_probability
+    negative = stock_compound.fall_probability
     stock = db.query(Stock).filter(Stock.id == stock_id).first()
 
     stock_history = db.query(StockHistory).filter(StockHistory.title == stock.title).all()
@@ -35,22 +35,24 @@ def stock_detail(stock_id):
         dates.append(index['date'][:10])
         closes.append(index['close'])
 
-    stock_title = db.query(StockTitle).filter(StockTitle.stock_id == stock_id).all()
+    stock_news = db.query(StockNews).filter(StockNews.stock_id == stock_id).all()
 
     titles = []
     links = []
-    for data in stock_title:
+    summaries = []
+    for data in stock_news:
         titles.append(data.title)
         links.append(data.link)
+        summaries.append(data.summary)
 
-    titles_and_links = list(zip(titles, links))
+    titles_and_summaries = list(zip(titles, links, summaries))
     return render_template("stock.html",
                            stock=stock,
-                           value=value,
-                           max_value=max_value,
+                           positive=positive,
+                           negative=negative,
                            closes=closes,
                            dates=dates,
-                           titles_and_links=titles_and_links)
+                           titles_and_summaries=titles_and_summaries)
 
 
 

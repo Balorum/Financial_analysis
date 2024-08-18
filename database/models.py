@@ -21,7 +21,8 @@ class Stock(Base):
     date = Column(DateTime, nullable=False, default=func.now())
 
     sentiments = relationship("StockSentiment", back_populates="stock")
-    titles = relationship("StockTitle", back_populates="stock")
+    news = relationship("StockNews", back_populates="stock")
+    compound = relationship("SentimentCompound", back_populates="stock")
 
 
 class StockHistory(Base):
@@ -47,11 +48,24 @@ class StockSentiment(Base):
 
 
 class StockNews(Base):
-    __tablename__ = "stock_titles"
+    __tablename__ = "stock_news"
     id = Column(Integer, primary_key=True)
     stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
     title = Column(String(250), nullable=False)
     link = Column(String(300), nullable=False)
     summary = Column(Text(), nullable=True)
+    decrease = Column(Integer, nullable=False)
+    increase = Column(Integer, nullable=False)
+    informativeness = Column(Integer, nullable=True)
 
-    stock = relationship("Stock", back_populates="titles")
+    stock = relationship("Stock", back_populates="news")
+
+
+class SentimentCompound(Base):
+    __tablename__ = "stock_compound"
+    id = Column(Integer, primary_key=True)
+    stock_id = Column(Integer, ForeignKey('stocks.id'), nullable=False)
+    fall_probability = Column(Float, nullable=False)
+    rise_probability = Column(Float, nullable=False)
+
+    stock = relationship("Stock", back_populates="compound")

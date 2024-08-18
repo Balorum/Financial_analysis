@@ -108,3 +108,35 @@ canvas {
 .back-to-home:hover {
     background-color: #45a049;
 }
+
+.prediction-container {
+    position: fixed;
+    bottom: 20px; /* 20px from the bottom of the page */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    text-align: center;
+    width: 100%; /* Ensure the container spans the full width for centering purposes */
+}
+
+.ratio-strip {
+    width: 300px; /* Set the width of the strip */
+    height: 20px; /* Adjust height as needed */
+    display: flex;
+    margin: 10px auto 0 auto; /* Center the strip horizontally within the container */
+    border: 1px solid #000; /* Optional: Add a border to make it more visible */
+}
+
+.green-strip {
+    background-color: green;
+    height: 100%;
+}
+
+.red-strip {
+    background-color: red;
+    height: 100%;
+}
+
+.growth-arrow {
+    width: 10px;
+    height: 15px;
+}
