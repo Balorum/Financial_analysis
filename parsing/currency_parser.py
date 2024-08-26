@@ -1,6 +1,9 @@
+import os
+
+os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
+
 import logging
 import bs4 as bs
-import os
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from database.models import Stock, StockHistory, DailyStockHistory, MonthlyStockHistory, StockNews, SentimentCompound
@@ -9,7 +12,7 @@ import requests
 from requests.exceptions import RequestException
 import yfinance as yf
 
-os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
+
 
 CURRENCY_LINK = "https://finance.yahoo.com/most-active/"
 
@@ -94,7 +97,7 @@ def get_currencies(page):
 
 def get_historical_data(page, history_period):
     try:
-        print("Page for historical data loaded successfully. Parsing content...")
+        logging.info("Page for historical data loaded successfully. Parsing content...")
 
         rows = page.find('tbody').find_all('tr')
         if not rows:
@@ -122,7 +125,7 @@ def get_historical_data(page, history_period):
         return company_history
 
     except Exception as e:
-        print(f"Error fetching currencies: {e}")
+        logging.error(f"Error fetching currencies: {e}")
         return {}
 
 
@@ -175,7 +178,7 @@ def update_companies_history(history_period, page):
         db.query(history_period["model"]).delete()
         db.commit()
 
-        db.execute(text("ALTER SEQUENCE stocks_history_id_seq RESTART WITH 1"))
+        db.execute(text(f"ALTER SEQUENCE {history_period['id']} RESTART WITH 1"))
         db.commit()
 
         logging.info("Fetching currencies...")
@@ -244,9 +247,9 @@ def start_parsing():
 
 def start_parsing_history():
     history = {
-        "year": {"period": "1y", "interval": "1d", "model": StockHistory},
-        "month": {"period": "1mo", "interval": "30m", "model": MonthlyStockHistory},
-        "day": {"period": "1d", "interval": "5m", "model": DailyStockHistory},
+        "year": {"period": "1y", "interval": "1d", "model": StockHistory, "id": "stocks_history_id_seq"},
+        "month": {"period": "1mo", "interval": "30m", "model": MonthlyStockHistory, "id": "monthly_history_id_seq"},
+        "day": {"period": "1d", "interval": "5m", "model": DailyStockHistory, "id": "daily_history_id_seq"},
     }
     page = get_page()
     update_companies_history(history["year"], page=page)
@@ -254,4 +257,4 @@ def start_parsing_history():
     update_companies_history(history["day"], page=page)
 
 
-start_parsing()
+start_parsing_history()
