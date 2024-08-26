@@ -3,49 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ stock.title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='stock.css') }}">
-    <script src="{{ url_for('static', filename='stock_script.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/stock.css') }}">
+    <script src="{{ url_for('static', filename='scripts/stock_script.js') }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const pos = {{ positive }};
         const neg = {{ negative }};
+        const dates = {{ dates | tojson }};
+        const closes = {{ closes | tojson }};
     </script>
 </head>
 <body>
     <div class="main-container">
+
         <div class="container">
+
             <div class="currency-block">
                 <h1>{{ stock.title }}</h1>
                 <p class="currency-text"><strong>Value:</strong> {{ stock.last }}</p>
                 <p class="currency-text"><strong>High:</strong> {{ stock.high }}</p>
                 <p class="currency-text"><strong>Low:</strong> {{ stock.low }}</p>
-                <p class="currency-text"><strong>Change:</strong> {{ stock.change*10 }}%{% if stock.growth %}
+                <p class="currency-text"><strong>Change:</strong> {{ stock.change }}
+                </p>
+                <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct}}%{% if stock.growth %}
                         <img src="{{ url_for('static', filename='images/growth.png') }}" alt="Up Arrow" class="growth-arrow">
                     {% else %}
                         <img src="{{ url_for('static', filename='images/fall.png') }}" alt="Down Arrow" class="growth-arrow">
                     {% endif %}
                 </p>
-                <p class="currency-text"><strong>Change Percentage:</strong> {{ stock.change_pct }}</p>
                 <p class="currency-text"><strong>Volume:</strong> {{ stock.volume }}</p>
                 <p class="currency-text"><strong>Growth:</strong> {{ 'Yes' if stock.growth else 'No' }}</p>
             </div>
+
             <div class="chart-container">
                 <canvas id="myChart"></canvas>
             </div>
+
+            <div class="button-container">
+            <button class="chart-button" onclick="window.location.href='http://127.0.0.1:5000/stock/{{stock.id}}?period=daily'"> Daily </button>
+            <button class="chart-button" onclick="window.location.href='http://127.0.0.1:5000/stock/{{stock.id}}?period=monthly'">Monthly</button>
+            <button class="chart-button" onclick="window.location.href='http://127.0.0.1:5000/stock/{{stock.id}}?period=yearly'">Yearly</button>
+            </div>
+
         </div>
 
         <div class="news-section">
-            <div class="links-section">
-                <h2>Conclusions were made based on these articles:</h2>
-                {% for title, link, summary in titles_and_summaries %}
-                    <div class="link-item">
+    <h2>Conclusions were made based on these articles:</h2>
+    <div class="carousel-container">
+        <button class="carousel-button left-button">&lt;</button>
+        <div class="carousel-wrapper">
+            <div class="carousel">
+                {% for title, link, summary, rise, fall in titles_summaries_rate %}
+                    <div class="link-item"
+                                style="background-color: {% if rise > fall %}rgba(0, 255, 0, 0.1){% else %}rgba(255, 0, 0, 0.1){% endif %};">
                         <a href="{{ link }}" target="_blank">{{ title }}</a>
                         <p>{{ summary }}</p>
                     </div>
                 {% endfor %}
             </div>
         </div>
+        <button class="carousel-button right-button">&gt;</button>
+    </div>
+</div>
 
     <div class="prediction-container">
             <h3>Prediction for the stock</h3>
@@ -55,54 +75,42 @@
             </div>
         </div>
     </div>
-    <script>
-        const dates = {{ dates | tojson }};
-
-        const data = {
-            labels: dates,
-            datasets: [{
-                label: 'Price',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
-                data: {{ closes | tojson }},
-                fill: true
-            }]
-        };
-
-        const config = {
-            type: 'line',
-            data: data,
-            options: {
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Stock History',
-                        font: {
-                            size: 24 // Adjust the font size as needed
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    }
-                }
-            }
-        };
-
-        const ctx = document.getElementById('myChart').getContext('2d');
-        ctx.canvas.style.backgroundColor = 'white';
-
-        const myChart = new Chart(ctx, config);
-    </script>
+     <script src="{{ url_for('static', filename='scripts/chart_script.js') }}"></script>
     <a href="/" class="back-to-home">Back to Home</a>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.querySelector('.carousel');
+        const carouselItems = document.querySelectorAll('.link-item');
+        const prevButton = document.querySelector('.left-button');
+        const nextButton = document.querySelector('.right-button');
+        let currentIndex = 0;
+
+        function updateCarousel() {
+            const itemWidth = carouselItems[0].clientWidth;
+            const translateXValue = -currentIndex * itemWidth;
+            carousel.style.transform = `translateX(${translateXValue}px)`;
+        }
+
+        prevButton.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+            } else {
+                currentIndex = carouselItems.length - 2; // Go to the last set of items
+            }
+            updateCarousel();
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentIndex < carouselItems.length - 2) {
+                currentIndex++;
+            } else {
+                currentIndex = 0; // Reset to the first set of items
+            }
+            updateCarousel();
+        });
+
+        window.addEventListener('resize', updateCarousel);
+    });
+</script>
 </html>

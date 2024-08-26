@@ -1,6 +1,6 @@
-from flask import Flask, render_template, jsonify, g
+from flask import Flask, render_template, jsonify, g, request
 from database.db import get_db
-from database.models import Stock, SentimentCompound, StockHistory, StockNews
+from database.models import Stock, SentimentCompound, StockHistory, StockNews, DailyStockHistory, MonthlyStockHistory
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 # from parsing import currency_parser #, article_parser
@@ -15,6 +15,8 @@ def index():
 
 @app.route("/stock/<int:stock_id>", methods=["GET", "POST"])
 def stock_detail(stock_id):
+    period = request.args.get('period', 'daily')
+
     db = g.get('db', None)
     if db is None:
         db = next(get_db())
@@ -24,7 +26,14 @@ def stock_detail(stock_id):
     negative = stock_compound.fall_probability
     stock = db.query(Stock).filter(Stock.id == stock_id).first()
 
-    stock_history = db.query(StockHistory).filter(StockHistory.title == stock.title).all()
+    if period == 'daily':
+        stock_history = db.query(DailyStockHistory).filter(DailyStockHistory.title == stock.title).all()
+    elif period == 'monthly':
+        stock_history = db.query(MonthlyStockHistory).filter(MonthlyStockHistory.title == stock.title).all()
+    elif period == 'yearly':
+        stock_history = db.query(StockHistory).filter(StockHistory.title == stock.title).all()
+    else:
+        return jsonify({'error': 'Invalid period specified'}), 400
     stock_history_data = [{
         'date': sh.date.isoformat(),
         'close': sh.close
@@ -32,7 +41,10 @@ def stock_detail(stock_id):
     dates = []
     closes = []
     for index in stock_history_data:
-        dates.append(index['date'][:10])
+        if period == "daily":
+            dates.append(index['date'][11:])
+        elif period == "monthly" or period == "yearly":
+            dates.append(index['date'][:10])
         closes.append(index['close'])
 
     stock_news = db.query(StockNews).filter(StockNews.stock_id == stock_id).all()
@@ -45,15 +57,19 @@ def stock_detail(stock_id):
         links.append(data.link)
         summaries.append(data.summary)
 
-    titles_and_summaries = list(zip(titles, links, summaries))
+    rises = [i.increase for i in stock_news]
+    falls = [i.decrease for i in stock_news]
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'dates': dates, 'closes': closes})
+
+    titles_summaries_rate = list(zip(titles, links, summaries, rises, falls))
     return render_template("stock.html",
                            stock=stock,
                            positive=positive,
                            negative=negative,
                            closes=closes,
                            dates=dates,
-                           titles_and_summaries=titles_and_summaries)
-
+                           titles_summaries_rate=titles_summaries_rate)
 
 
 @app.route("/data", methods=["GET", "POST"])
