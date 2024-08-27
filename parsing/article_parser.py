@@ -11,7 +11,7 @@ from database.db import get_db
 from database.models import StockNews, Stock, SentimentCompound
 import article_analyzer
 
-os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
+# os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',

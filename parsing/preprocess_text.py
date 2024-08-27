@@ -2,7 +2,7 @@ import bs4 as bs
 import os
 import re
 
-os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
+# os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
 
 
 def dev_find_textfile():

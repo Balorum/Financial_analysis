@@ -1,6 +1,6 @@
 import os
 
-os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
+# os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
 
 import logging
 import bs4 as bs

@@ -12,7 +12,7 @@ nltk.download('stopwords')
 import vertexai
 from vertexai.generative_models import GenerativeModel
 
-os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
+# os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
 
 logging.basicConfig(
     level=logging.INFO,  # Change to DEBUG for more verbose output
