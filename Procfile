@@ -1,0 +1,1 @@
+web: waitress --bind :8000 main:app

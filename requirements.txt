@@ -22,3 +22,5 @@ uri-template
 webcolors
 webdriver-manager
 yfinance
+nltk
+gunicorn
