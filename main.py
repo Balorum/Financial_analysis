@@ -59,8 +59,8 @@ def stock_detail(stock_id):
 
     rises = [i.increase for i in stock_news]
     falls = [i.decrease for i in stock_news]
-    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({'dates': dates, 'closes': closes})
+    # if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+    #     return jsonify({'dates': dates, 'closes': closes})
 
     titles_summaries_rate = list(zip(titles, links, summaries, rises, falls))
     return render_template("stock.html",
@@ -70,6 +70,46 @@ def stock_detail(stock_id):
                            closes=closes,
                            dates=dates,
                            titles_summaries_rate=titles_summaries_rate)
+
+
+@app.route("/stock_data/<int:stock_id>", methods=["GET"])
+def stock_data(stock_id):
+    period = request.args.get('period', 'daily')
+
+    db = g.get('db', None)
+    if db is None:
+        db = next(get_db())
+        g.db = db
+
+    stock = db.query(Stock).filter(Stock.id == stock_id).first()
+
+    if not stock:
+        return jsonify({'error': 'Stock not found'}), 404
+
+    if period == 'daily':
+        stock_history = db.query(DailyStockHistory).filter(DailyStockHistory.title == stock.title).all()
+    elif period == 'monthly':
+        stock_history = db.query(MonthlyStockHistory).filter(MonthlyStockHistory.title == stock.title).all()
+    elif period == 'yearly':
+        stock_history = db.query(StockHistory).filter(StockHistory.title == stock.title).all()
+    else:
+        return jsonify({'error': 'Invalid period specified'}), 400
+
+    stock_history_data = [{
+        'date': sh.date.isoformat(),
+        'close': sh.close
+    } for sh in stock_history]
+
+    dates = []
+    closes = []
+    for index in stock_history_data:
+        if period == "daily":
+            dates.append(index['date'][11:])
+        elif period == "monthly" or period == "yearly":
+            dates.append(index['date'][:10])
+        closes.append(index['close'])
+
+    return jsonify({'dates': dates, 'closes': closes})
 
 
 @app.route("/data", methods=["GET", "POST"])

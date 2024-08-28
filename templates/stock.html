@@ -41,9 +41,9 @@
             </div>
 
             <div class="button-container">
-            <button class="chart-button" onclick="window.location.href='http://127.0.0.1:5000/stock/{{stock.id}}?period=daily'"> Daily </button>
-            <button class="chart-button" onclick="window.location.href='http://127.0.0.1:5000/stock/{{stock.id}}?period=monthly'">Monthly</button>
-            <button class="chart-button" onclick="window.location.href='http://127.0.0.1:5000/stock/{{stock.id}}?period=yearly'">Yearly</button>
+                <button class="chart-button" data-period="daily">Daily</button>
+                <button class="chart-button" data-period="monthly">Monthly</button>
+                <button class="chart-button" data-period="yearly">Yearly</button>
             </div>
 
         </div>
@@ -96,7 +96,7 @@
             if (currentIndex > 0) {
                 currentIndex--;
             } else {
-                currentIndex = carouselItems.length - 2; // Go to the last set of items
+                currentIndex = carouselItems.length - 2;
             }
             updateCarousel();
         });
@@ -105,12 +105,38 @@
             if (currentIndex < carouselItems.length - 2) {
                 currentIndex++;
             } else {
-                currentIndex = 0; // Reset to the first set of items
+                currentIndex = 0;
             }
             updateCarousel();
         });
 
         window.addEventListener('resize', updateCarousel);
+
+        const chartButtons = document.querySelectorAll('.chart-button');
+        const chartUrl = '/stock_data/{{ stock.id }}';
+
+        chartButtons.forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                const period = this.textContent.toLowerCase();
+                fetch(`${chartUrl}?period=${period}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error(data.error);
+                        } else {
+                            updateChart(data.dates, data.closes);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            });
+        });
+
+        function updateChart(dates, closes) {
+            myChart.data.labels = dates;
+            myChart.data.datasets[0].data = closes;
+            myChart.update();
+        }
     });
 </script>
 </html>
