@@ -1,7 +1,3 @@
-import os
-
-# os.chdir("C:\\Users\\remes\\PycharmProjects\\Financial_analysis")
-
 import logging
 import bs4 as bs
 from sqlalchemy import text
@@ -13,9 +9,11 @@ from requests.exceptions import RequestException
 import yfinance as yf
 
 
-
+# URL to fetch the most active stocks from Yahoo Finance
 CURRENCY_LINK = "https://finance.yahoo.com/most-active/"
 
+
+# Configure logging to write to both a log file and the console
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s:%(levelname)s:%(message)s',
                     handlers=[
@@ -26,6 +24,15 @@ logging.basicConfig(level=logging.INFO,
 
 
 def get_page(link=CURRENCY_LINK):
+    """
+        Fetches and parses a web page.
+
+        Args:
+            link (str): URL of the page to fetch. Defaults to the Yahoo Finance active stocks page.
+
+        Returns:
+            BeautifulSoup object if successful, None otherwise.
+    """
     try:
         logging.info("Opening the web page...")
         response = requests.get(link)
@@ -38,6 +45,15 @@ def get_page(link=CURRENCY_LINK):
 
 
 def get_company_name(row):
+    """
+        Extracts the company name from a table row.
+
+        Args:
+            row (BeautifulSoup object): A table row element containing stock data.
+
+        Returns:
+            str: The company name, or None if extraction fails.
+    """
     try:
         company_name = row.find('td', attrs={'class': 'Va(m) Ta(start) Px(10px) Fz(s)'}).text
         company_name = company_name.replace(', Inc.', '')
@@ -49,6 +65,15 @@ def get_company_name(row):
 
 
 def get_stock_name(row):
+    """
+        Extracts the stock symbol from a table row.
+
+        Args:
+            row (BeautifulSoup object): A table row element containing stock data.
+
+        Returns:
+            str: The stock symbol, or None if extraction fails.
+    """
     try:
         return row.find('a', attrs={"data-test": "quoteLink"}).text
     except AttributeError as e:
@@ -57,6 +82,15 @@ def get_stock_name(row):
 
 
 def get_currencies(page):
+    """
+        Extracts stock data from the provided web page.
+
+        Args:
+            page (BeautifulSoup object): The parsed HTML page containing stock data.
+
+        Returns:
+            dict: A dictionary containing stock data for each company.
+    """
     try:
         logging.info("Page loaded successfully. Parsing content...")
 
@@ -96,6 +130,16 @@ def get_currencies(page):
 
 
 def get_historical_data(page, history_period):
+    """
+        Fetches historical data for stocks listed on the provided page.
+
+        Args:
+            page (BeautifulSoup object): The parsed HTML page containing stock data.
+            history_period (dict): Specifies the period and interval for fetching historical data.
+
+        Returns:
+            dict: A dictionary containing historical stock data for each company.
+    """
     try:
         logging.info("Page for historical data loaded successfully. Parsing content...")
 
@@ -130,6 +174,12 @@ def get_historical_data(page, history_period):
 
 
 def update_companies(page):
+    """
+        Updates the Stock table in the database with the latest data.
+
+        Args:
+            page (BeautifulSoup object): The parsed HTML page containing stock data.
+    """
     db = next(get_db())
     try:
         logging.info("Clearing the Stock table...")
@@ -171,6 +221,13 @@ def update_companies(page):
 
 
 def update_companies_history(history_period, page):
+    """
+        Updates the historical stock data in the database.
+
+        Args:
+            history_period (dict): Specifies the model and sequence details for different historical periods.
+            page (BeautifulSoup object): The parsed HTML page containing stock data.
+    """
     db = next(get_db())
     try:
         logging.info("Clearing the Stock-History table...")
@@ -212,6 +269,9 @@ def update_companies_history(history_period, page):
 
 
 def clear_dependencies():
+    """
+        Clears data in related dependency tables (StockNews and SentimentCompound) in the database.
+    """
     db = next(get_db())
     try:
         logging.info("Clearing dependencies...")
@@ -237,6 +297,9 @@ def clear_dependencies():
 
 
 def start_parsing():
+    """
+        Initiates the process to clear dependencies and update companies' data.
+    """
     clear_dependencies()
     page = get_page()
     if page:
@@ -246,6 +309,9 @@ def start_parsing():
 
 
 def start_parsing_history():
+    """
+        Initiates the process to fetch and update historical stock data for different periods (year, month, day).
+    """
     history = {
         "year": {"period": "1y", "interval": "1d", "model": StockHistory, "id": "stocks_history_id_seq"},
         "month": {"period": "1mo", "interval": "30m", "model": MonthlyStockHistory, "id": "monthly_history_id_seq"},
