@@ -1,12 +1,9 @@
 flask
-pip-chill
-apscheduler
 bs4
 alembic
 psycopg2
 requests
-yfinance
-nltk
+yfinance==0.2.38
 vertexai
 sqlalchemy
 pydantic_settings

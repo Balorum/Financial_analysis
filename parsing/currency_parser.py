@@ -2,7 +2,8 @@ import logging
 import bs4 as bs
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from database.models import Stock, StockHistory, DailyStockHistory, MonthlyStockHistory, StockNews, SentimentCompound
+from database.models import Stock, StockHistory, DailyStockHistory, MonthlyStockHistory
+from database.models import StockNews, SentimentCompound, HistoryToAnalyze
 from database.db import get_db
 import requests
 from requests.exceptions import RequestException
@@ -113,10 +114,10 @@ def get_currencies(page):
             stock_history = yf.Ticker(stock_name).history()
 
             companies_dict[company_name] = {
-                "last": round(stock_history["Close"].iloc[-1], 2),
-                "high": round(stock_history["High"].iloc[-1], 2),
-                "low": round(stock_history["Low"].iloc[-1], 2),
-                "vol": round(stock_history["Volume"].iloc[-1]/1000000, 3),
+                "last": float(round(stock_history["Close"].iloc[-1], 2)),
+                "high": float(round(stock_history["High"].iloc[-1], 2)),
+                "low": float(round(stock_history["Low"].iloc[-1], 2)),
+                "vol": float(round(stock_history["Volume"].iloc[-1]/1000000, 3)),
                 "change": change_cell[1:],
                 "change_pct": change_prc_cell[1:-1],
                 "growth": growth
@@ -158,11 +159,11 @@ def get_historical_data(page, history_period):
             for date, row in hist_data.iterrows():
                 historical_prices.append({
                     "title": company_name,
-                    "open": round(row["Open"], 2),
-                    "high": round(row["High"], 2),
-                    "low": round(row["Low"], 2),
-                    "close": round(row["Close"], 2),
-                    "volume": round(row["Volume"], 2),
+                    "open": float(round(row["Open"], 2)),
+                    "high": float(round(row["High"], 2)),
+                    "low": float(round(row["Low"], 2)),
+                    "close": float(round(row["Close"], 2)),
+                    "volume": float(round(row["Volume"], 2)),
                     "date": date,
                 })
             company_history[company_name] = historical_prices
@@ -316,11 +317,10 @@ def start_parsing_history():
         "year": {"period": "1y", "interval": "1d", "model": StockHistory, "id": "stocks_history_id_seq"},
         "month": {"period": "1mo", "interval": "30m", "model": MonthlyStockHistory, "id": "monthly_history_id_seq"},
         "day": {"period": "1d", "interval": "5m", "model": DailyStockHistory, "id": "daily_history_id_seq"},
+        "2_years": {"period": "2y", "interval": "1d", "model": HistoryToAnalyze, "id": "analyze_history_id_seq"}
     }
     page = get_page()
     update_companies_history(history["year"], page=page)
     update_companies_history(history["month"], page=page)
     update_companies_history(history["day"], page=page)
-
-
-start_parsing_history()
+    update_companies_history(history["2_years"], page=page)
